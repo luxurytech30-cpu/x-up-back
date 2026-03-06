@@ -17,9 +17,9 @@ const servicesRoutes = require("./routes/services.routes");
 const app = express();
 
 const allowedOrigins = [
-  "https://barbershop-front.vercel.app",
-  "http://localhost:3000",
-  "http://localhost:5173",
+  "https://x-up10.vercel.app",
+  "http://localhost:8080",
+  "http://localhost:8081",
 ];
 
 app.set("trust proxy", 1);
