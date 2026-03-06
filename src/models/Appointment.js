@@ -32,14 +32,39 @@ const AppointmentSchema = new mongoose.Schema(
       index: true,
     },
 
-    // session user who created it (if logged in)
+    // public self-management without login
+    manageToken: {
+      type: String,
+      default: null,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
+
+    bookingCode: {
+      type: String,
+      default: null,
+      index: true,
+    },
+
+    clientCanEdit: {
+      type: Boolean,
+      default: true,
+    },
+
+    // 2 hours = 120 minutes
+    clientEditCutoffMinutes: {
+      type: Number,
+      default: 120,
+      min: 0,
+    },
+
+    // session user who created it (if logged in admin/user)
     createdByUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
-
-    clientEditCutoffMinutes: { type: Number, default: 60 },
 
     cancelledAt: { type: Date, default: null },
     cancelledByUserId: {
