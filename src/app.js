@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
-const MongoStore = require("connect-mongo").default;
+const MongoStore = require("connect-mongo");
 const authRoutes = require("./routes/auth.routes");
 const productRoutes = require("./routes/product.routes");
 const cartRoutes = require("./routes/cart.routes");
@@ -22,20 +22,16 @@ const allowedOrigins = [
   "http://localhost:5173",
 ];
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
+    origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   }),
 );
+
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -45,11 +41,13 @@ app.use(
     secret: process.env.SESSION_SECRET || "dev_secret",
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+    }),
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
     },
   }),
 );
@@ -63,9 +61,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/barbers", barberRoutes);
 app.use("/api/queues", queueRoutes);
 app.use("/api/courses", courseRoutes);
-app.use("/api/barbers-schedule", require("./routes/barberSchedule"));
+app.use("/api/barbers-schedule", barberScheduleRoutes);
 app.use("/api/appointments", appointmentsRoutes);
 app.use("/api/availability", require("./routes/availability.routes"));
 app.use("/api/services", servicesRoutes);
-console.log("✅ mounted /api/appointments");
+
 module.exports = app;
